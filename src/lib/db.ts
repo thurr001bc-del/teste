@@ -5,8 +5,10 @@ import { uid, token, addDaysISO, todayISO, addMinutesToTime, timeToMinutes, minu
 
 export { uid, token };
 
-const DATA_DIR = path.join(process.cwd(), "data");
+const IS_VERCEL = process.env.VERCEL === "1";
+const DATA_DIR = IS_VERCEL ? path.join("/tmp", "data") : path.join(process.cwd(), "data");
 const DB_PATH = path.join(DATA_DIR, "db.json");
+const SEED_DB_PATH = path.join(process.cwd(), "data", "db.json");
 
 // ---- password hashing (scrypt) -----------------------------
 import crypto from "crypto";
@@ -236,6 +238,18 @@ function ensureDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
+// Copy seed DB to /tmp on Vercel if not present
+function ensureSeed() {
+  ensureDir();
+  if (fs.existsSync(DB_PATH)) return;
+  if (fs.existsSync(SEED_DB_PATH)) {
+    try {
+      fs.copyFileSync(SEED_DB_PATH, DB_PATH);
+      return;
+    } catch {}
+  }
+}
+
 // Keeps previously saved databases compatible after schema changes.
 function normalize(db: Database): Database {
   if (!Array.isArray(db.collections)) {
@@ -258,7 +272,7 @@ function normalize(db: Database): Database {
 
 export function getDB(): Database {
   if (cache) return cache;
-  ensureDir();
+  ensureSeed();
   if (fs.existsSync(DB_PATH)) {
     try {
       cache = normalize(JSON.parse(fs.readFileSync(DB_PATH, "utf-8")));
@@ -273,7 +287,7 @@ export function getDB(): Database {
 }
 
 export function persist(db: Database) {
-  ensureDir();
+  ensureSeed();
   fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
   cache = db;
 }
