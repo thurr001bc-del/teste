@@ -195,15 +195,10 @@ function seed(): Database {
   ];
 
   const notifications: Notification[] = [
-    { id: "not_1", barbershopId: shopId, type: "new_booking", title: "Novo agendamento", message: "João Silva agendou Corte + Barba.", read: false, relatedId: appointments[0]?.id, createdAt: now },
-    { id: "not_2", barbershopId: shopId, type: "low_stock", title: "Estoque baixo", message: "Óleo Prendedor Vanguard está com 9 unidades.", read: false, createdAt: now },
-    { id: "not_3", barbershopId: shopId, type: "confirmation", title: "Horário confirmado", message: "Pedro Henrique confirmou o horário.", read: true, createdAt: now },
+    { id: "not_1", barbershopId: shopId, type: "low_stock", title: "Estoque baixo", message: "Óleo Prendedor Vanguard está com 9 unidades.", read: false, createdAt: now },
   ];
 
-  const orders: Order[] = [
-    { id: "ord_1", barbershopId: shopId, customerName: "Bruno Carvalho", customerPhone: "(11) 98888-0000", items: [{ productId: "prd_1", name: "Pomada Matte Vanguard", price: 59, qty: 2 }, { productId: "prd_5", name: "Óleo para Barba Gold", price: 52, qty: 1 }], total: 170, status: "fulfilled", createdAt: addDaysISO(todayISO(), -3) + "T15:00:00Z" },
-    { id: "ord_2", barbershopId: shopId, customerName: "Cauã Ferreira", customerPhone: "(11) 97777-1111", items: [{ productId: "prd_10", name: "Kit Completo Mestre", price: 199, qty: 1 }], total: 199, status: "paid", createdAt: addDaysISO(todayISO(), -1) + "T11:00:00Z" },
-  ];
+  const orders: Order[] = [];
 
   const collectionNames = ["Pomadas", "Shampoo", "Óleo", "Pentes", "Acessórios", "Kits"];
   const collections: Collection[] = collectionNames.map((name, i) => ({
@@ -216,10 +211,7 @@ function seed(): Database {
   }));
 
   const transactions: Transaction[] = [
-    { id: "tx_1", barbershopId: shopId, type: "expense", description: "Aluguel da barbearia", amount: 2500, date: addDaysISO(todayISO(), -12), createdAt: now },
-    { id: "tx_2", barbershopId: shopId, type: "expense", description: "Compra de insumos e produtos", amount: 480, date: addDaysISO(todayISO(), -5), createdAt: now },
-    { id: "tx_3", barbershopId: shopId, type: "income", description: "Vendas de produtos (balcão)", amount: 920, date: addDaysISO(todayISO(), -3), createdAt: now },
-    { id: "tx_4", barbershopId: shopId, type: "income", description: "Serviços realizados", amount: 1650, date: addDaysISO(todayISO(), -1), createdAt: now },
+    { id: "tx_1", barbershopId: shopId, type: "expense", description: "Aluguel da barbearia", amount: 2500, date: addDaysISO(todayISO(), -1), createdAt: now },
   ];
 
   return {

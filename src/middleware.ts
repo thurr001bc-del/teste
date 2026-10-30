@@ -12,12 +12,18 @@ export function middleware(req: NextRequest) {
   if (!hasSession && !isLogin) {
     const url = req.nextUrl.clone();
     url.pathname = "/admin/login";
-    return NextResponse.redirect(url);
+    const res = NextResponse.redirect(url);
+    res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+    res.headers.set("Pragma", "no-cache");
+    return res;
   }
   if (hasSession && isLogin) {
     const url = req.nextUrl.clone();
     url.pathname = "/admin";
-    return NextResponse.redirect(url);
+    const res = NextResponse.redirect(url);
+    res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+    res.headers.set("Pragma", "no-cache");
+    return res;
   }
   return NextResponse.next();
 }

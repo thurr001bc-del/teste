@@ -3,5 +3,8 @@ import { clearSession } from "@/lib/auth";
 
 export async function POST() {
   clearSession();
-  return NextResponse.json({ ok: true });
+  const res = NextResponse.json({ ok: true });
+  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+  res.headers.set("Pragma", "no-cache");
+  return res;
 }

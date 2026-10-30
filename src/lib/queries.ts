@@ -16,8 +16,8 @@ export function getPublicData(slug: string) {
 
 export function attachRelations(apt: Appointment): AppointmentWithRelations {
   const db = getDB();
-  const service = db.services.find((s) => s.id === apt.serviceId)!;
-  const barber = db.barbers.find((b) => b.id === apt.barberId)!;
+  const service = db.services.find((s) => s.id === apt.serviceId) || { id: apt.serviceId, barbershopId: apt.barbershopId, name: "Serviço removido", description: "", price: 0, duration: 0, barberIds: [], active: false };
+  const barber = db.barbers.find((b) => b.id === apt.barberId) || { id: apt.barberId, barbershopId: apt.barbershopId, name: "Barbeiro removido", bio: "", photo: undefined, specialties: [], schedule: [], daysOff: [], active: false };
   const customer = db.customers.find((c) => c.id === apt.customerId);
   return { ...apt, service, barber, customer };
 }

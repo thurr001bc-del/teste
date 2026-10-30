@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, Scissors, Clock, Check } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Plus, Pencil, Trash2, Scissors, Clock, Check, Upload } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Avatar } from "@/components/ui/avatar";
 import { useToast } from "@/components/toast";
@@ -21,9 +21,11 @@ export default function BarbeirosPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Barber | null>(null);
   const [creating, setCreating] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({
     name: "", bio: "", photo: "", active: true, specialties: [] as string[], schedule: defaultSchedule(),
   });
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     const [b, s] = await Promise.all([fetch("/api/barbers").then((r) => r.json()), fetch("/api/services").then((r) => r.json())]);
@@ -40,14 +42,42 @@ export default function BarbeirosPage() {
   async function save() {
     if (!form.name) { toast({ title: "Informe o nome", variant: "error" }); return; }
     const payload = { ...form };
-    const res = await fetch(editing ? `/api/barbers/${editing.id}` : "/api/barbers", {
-      method: editing ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (res.ok) { toast({ title: editing ? "Barbeiro atualizado" : "Barbeiro adicionado", variant: "success" }); setCreating(false); setEditing(null); load(); }
+    try {
+      const res = await fetch(editing ? `/api/barbers/${editing.id}` : "/api/barbers", {
+        method: editing ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { toast({ title: data.error || "Erro ao salvar barbeiro", variant: "error" }); return; }
+      toast({ title: editing ? "Barbeiro atualizado" : "Barbeiro adicionado", variant: "success" });
+      setCreating(false); setEditing(null); load();
+    } catch (e) { toast({ title: "Erro ao salvar barbeiro", variant: "error" }); }
   }
-  async function remove(id: string) { await fetch(`/api/barbers/${id}`, { method: "DELETE" }); setEditing(null); toast({ title: "Barbeiro removido", variant: "success" }); load(); }
+
+  async function remove(id: string) {
+    try {
+      const res = await fetch(`/api/barbers/${id}`, { method: "DELETE" });
+      if (!res.ok) { toast({ title: "Erro ao remover barbeiro", variant: "error" }); return; }
+      setEditing(null);
+      toast({ title: "Barbeiro removido", variant: "success" });
+      load();
+    } catch (e) { toast({ title: "Erro ao remover barbeiro", variant: "error" }); }
+  }
+
+  async function uploadPhoto(file: File) {
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.url) { toast({ title: data.error || "Erro ao enviar imagem", variant: "error" }); return; }
+      setForm((prev) => ({ ...prev, photo: data.url }));
+      toast({ title: "Imagem enviada", variant: "success" });
+    } catch (e) { toast({ title: "Erro ao enviar imagem", variant: "error" }); }
+    finally { setUploading(false); }
+  }
 
   return (
     <div>
@@ -88,7 +118,17 @@ export default function BarbeirosPage() {
         <div className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div><label className="label">Nome</label><input className="input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-            <div><label className="label">Foto (URL)</label><input className="input" value={form.photo} onChange={(e) => setForm({ ...form, photo: e.target.value })} placeholder="https://..." /></div>
+            <div>
+              <label className="label">Foto</label>
+              <div className="flex items-center gap-3">
+                <Avatar name={form.name || "Barbeiro"} src={form.photo} size="md" />
+                <div className="flex-1">
+                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadPhoto(f); }} />
+                  <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className="btn-outline w-full justify-center"><Upload className="h-4 w-4" /> {uploading ? "Enviando..." : "Enviar do computador"}</button>
+                </div>
+              </div>
+              {form.photo && <p className="mt-2 text-xs text-foreground-subtle">Imagem atual: {form.photo}</p>}
+            </div>
           </div>
           <div><label className="label">Bio</label><input className="input" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} /></div>
 

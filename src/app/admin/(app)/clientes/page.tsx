@@ -38,20 +38,25 @@ export default function ClientesPage() {
   async function save() {
     if (!form.name || !form.phone) { toast({ title: "Nome e telefone obrigatórios", variant: "error" }); return; }
     const isEdit = !!editing;
-    const res = await fetch(isEdit ? `/api/customers/${editing!.id}` : "/api/customers", {
-      method: isEdit ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    if (res.ok) {
+    try {
+      const res = await fetch(isEdit ? `/api/customers/${editing!.id}` : "/api/customers", {
+        method: isEdit ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { toast({ title: data.error || "Erro ao salvar cliente", variant: "error" }); return; }
       toast({ title: isEdit ? "Cliente atualizado" : "Cliente criado", variant: "success" });
       setCreating(false); setEditing(null); load();
-    }
+    } catch (e) { toast({ title: "Erro ao salvar cliente", variant: "error" }); }
   }
 
   async function remove(id: string) {
-    await fetch(`/api/customers/${id}`, { method: "DELETE" });
-    setEditing(null); toast({ title: "Cliente removido", variant: "success" }); load();
+    try {
+      const res = await fetch(`/api/customers/${id}`, { method: "DELETE" });
+      if (!res.ok) { toast({ title: "Erro ao remover cliente", variant: "error" }); return; }
+      setEditing(null); toast({ title: "Cliente removido", variant: "success" }); load();
+    } catch (e) { toast({ title: "Erro ao remover cliente", variant: "error" }); }
   }
 
   async function openDetail(c: Cust) {

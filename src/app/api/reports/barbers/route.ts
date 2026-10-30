@@ -31,7 +31,11 @@ function computeRange(period: Period, customFrom: string, customTo: string): { f
 
 export async function GET(req: Request) {
   const session = getSession();
-  if (!session) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+  if (!session) {
+    const res = NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+    res.headers.set("Cache-Control", "no-store");
+    return res;
+  }
 
   const { searchParams } = new URL(req.url);
   const period = (searchParams.get("period") as Period) || "mensal";
@@ -118,7 +122,7 @@ export async function GET(req: Request) {
     avgTicket: b.avgTicket,
   }));
 
-  return NextResponse.json({
+  const res = NextResponse.json({
     from: range.from,
     to: range.to,
     barbers: barberReports,
@@ -126,4 +130,7 @@ export async function GET(req: Request) {
     totalRevenue: barberReports.reduce((s, b) => s + b.revenue, 0),
     totalAppointments: apts.length,
   });
+  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+  res.headers.set("Pragma", "no-cache");
+  return res;
 }

@@ -36,10 +36,15 @@ export default function ColecoesPage() {
     const name = newName.trim();
     if (!name) return;
     setCreating(true);
-    const res = await fetch("/api/collections", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name }) });
-    setCreating(false);
-    if (res.ok) { setNewName(""); toast({ title: "Coleção criada", variant: "success" }); load(); }
-    else { const d = await res.json().catch(() => ({})); toast({ title: d.error || "Erro ao criar", variant: "error" }); }
+    try {
+      const res = await fetch("/api/collections", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name }) });
+      if (res.ok) { setNewName(""); toast({ title: "Coleção criada", variant: "success" }); await load(); }
+      else { const d = await res.json().catch(() => ({})); toast({ title: d.error || "Erro ao criar", variant: "error" }); }
+    } catch (e) {
+      toast({ title: "Erro de conexão", variant: "error" });
+    } finally {
+      setCreating(false);
+    }
   }
 
   async function toggleFeatured(c: Collection) {

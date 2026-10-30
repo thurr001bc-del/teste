@@ -7,7 +7,10 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   const db = getDB();
   const barbers = db.barbers.filter((b) => b.barbershopId === session.barbershopId);
-  return NextResponse.json({ barbers });
+  const res = NextResponse.json({ barbers });
+  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+  res.headers.set("Pragma", "no-cache");
+  return res;
 }
 
 export async function POST(req: Request) {
@@ -30,5 +33,7 @@ export async function POST(req: Request) {
     db.barbers.push(b);
     return b;
   });
-  return NextResponse.json({ ok: true, barber });
+  const res = NextResponse.json({ ok: true, barber });
+  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+  return res;
 }

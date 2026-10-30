@@ -4,7 +4,9 @@ import { getUserByEmail, getDB, mutate } from "./db";
 import { verifyPassword } from "./db";
 import { Barbershop } from "./types";
 
-const SECRET = process.env.SESSION_SECRET || "vanguard-dev-secret";
+const SESSION_SECRET_RAW = process.env.SESSION_SECRET;
+
+const SECRET = SESSION_SECRET_RAW || "dev-session-secret-key-for-development-only";
 export const SESSION_COOKIE = "vanguard_session";
 
 export interface Session {

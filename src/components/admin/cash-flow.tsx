@@ -65,21 +65,29 @@ export function CashFlowProvider({ children }: { children: ReactNode }) {
     const amount = Number(form.amount);
     if (!(amount > 0)) { toast({ title: "Informe um valor válido", variant: "error" }); return; }
     setSaving(true);
-    const res = await fetch(editingId ? `/api/transactions/${editingId}` : "/api/transactions", {
-      method: editingId ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: form.type, description: form.description.trim(), amount, date: form.date }),
-    });
-    setSaving(false);
-    if (res.ok) { setOpen(false); toast({ title: editingId ? "Movimentação atualizada" : "Movimentação registrada", variant: "success" }); load(); }
-    else { const d = await res.json().catch(() => ({})); toast({ title: d.error || "Erro ao salvar", variant: "error" }); }
+    try {
+      const res = await fetch(editingId ? `/api/transactions/${editingId}` : "/api/transactions", {
+        method: editingId ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: form.type, description: form.description.trim(), amount, date: form.date }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { toast({ title: data.error || "Erro ao salvar movimentação", variant: "error" }); return; }
+      setOpen(false);
+      toast({ title: editingId ? "Movimentação atualizada" : "Movimentação registrada", variant: "success" });
+      load();
+    } catch (e) { toast({ title: "Erro ao salvar movimentação", variant: "error" }); }
+    finally { setSaving(false); }
   }
 
   async function remove(t: Transaction) {
     if (!confirm(`Remover "${t.description}"?`)) return;
-    const res = await fetch(`/api/transactions/${t.id}`, { method: "DELETE" });
-    if (res.ok) { toast({ title: "Movimentação removida", variant: "success" }); load(); }
-    else { toast({ title: "Erro ao remover", variant: "error" }); }
+    try {
+      const res = await fetch(`/api/transactions/${t.id}`, { method: "DELETE" });
+      if (!res.ok) { toast({ title: "Erro ao remover", variant: "error" }); return; }
+      toast({ title: "Movimentação removida", variant: "success" });
+      load();
+    } catch (e) { toast({ title: "Erro ao remover", variant: "error" }); }
   }
 
   const income = txs.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
