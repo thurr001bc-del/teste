@@ -26,22 +26,28 @@ export default function HomePage() {
       {/* HERO */}
       <section id="inicio" className="relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-accent-soft/60 blur-3xl" />
+          <img
+            src="/uploads/fundo.png"
+            alt=""
+            className="h-full w-full object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80" />
+          <div className="absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-accent/10 blur-3xl" />
         </div>
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 lg:grid-cols-2 lg:py-24">
           <div>
             <Reveal>
-              <span className="chip mb-5">
+              <span className="chip mb-5 bg-white/10 text-white border-white/20">
                 <Sparkles className="h-3.5 w-3.5 text-accent" /> {shop.tagline}
               </span>
             </Reveal>
             <Reveal delay={0.05}>
-              <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-foreground sm:text-6xl">
+              <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl">
                 {shop.settings.heroHeadline}
               </h1>
             </Reveal>
             <Reveal delay={0.1}>
-              <p className="mt-5 max-w-lg text-lg leading-relaxed text-foreground-muted">
+              <p className="mt-5 max-w-lg text-lg leading-relaxed text-white/80">
                 {shop.settings.heroSubline}
               </p>
             </Reveal>
@@ -56,15 +62,15 @@ export default function HomePage() {
               </div>
             </Reveal>
             <Reveal delay={0.2}>
-              <div className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-border pt-8">
+              <div className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-white/20 pt-8">
                 {[
                   { v: "8+", l: "Anos de estúdio" },
                   { v: "12k", l: "Clientes atendidos" },
                   { v: "4.9", l: "Avaliação média" },
                 ].map((s) => (
                   <div key={s.l}>
-                    <p className="font-display text-2xl font-bold text-foreground">{s.v}</p>
-                    <p className="mt-0.5 text-xs text-foreground-muted">{s.l}</p>
+                    <p className="font-display text-2xl font-bold text-white">{s.v}</p>
+                    <p className="mt-0.5 text-xs text-white/70">{s.l}</p>
                   </div>
                 ))}
               </div>
